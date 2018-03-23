@@ -4465,9 +4465,9 @@ ITHit.DefineClass("ITHit.WebDAV.Client.Exceptions.IntegrationException", ITHit.W
                     var _570 = "/Plugins/";
                 }
                 var _571 = function() {
-                    if (confirm("To open document you must install a custom protocol. Continue?")) {
-                        window.open(_570 + self.GetInstallFileName());
-                    }
+                    //if (confirm("To open document you must install a custom protocol. Continue?")) {
+                        //window.open(_570 + self.GetInstallFileName());
+                    //}
                 };
                 return _571;
             },
