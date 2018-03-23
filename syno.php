@@ -53,6 +53,8 @@ class Synology {
         try {
             $this->Login();
         } catch (Exception $e) {
+            echo "login failed";
+            die;
         }
         //var_dump($this->download());
         //var_dump($this->getThumb());
@@ -82,7 +84,7 @@ class Synology {
         //Common error
         if ($object != null) {
             if (!$object->success && array_key_exists($object->error->code, $this->common_error_codes)) {
-                echo $this->common_error_codes[$object->error->code]."</br>";
+                //echo $this->common_error_codes[$object->error->code]."</br>";
             }
         }
 

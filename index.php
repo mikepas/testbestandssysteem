@@ -39,6 +39,7 @@ $syno = new Synology();
 
 $path = "/test";
 if (isset($_POST['open']) && $_POST['open'] != null) $path = $_POST['open'];
+unset($_POST);
 $backUrl = substr($path, 0, strrpos($path, "/"));
 ?>
 <!DOCTYPE html>
@@ -66,6 +67,7 @@ $backUrl = substr($path, 0, strrpos($path, "/"));
                     </button>
                 </div>
             </div>
+            <a href="ms-word:ofe|u|http://192.168.5.220:5005/test/childtest/grandchildtest/tekst2site.docx">test</a>
             <br/>
             <!--<table class="table">
                 <th>Filename</th><th>Size</th><th>Creationdate</th><th>Resource Type</th><th>Content Type</th><th>Activelock Depth</th><th>Activelock Owner</th><th>Activelock Token</th><th>Activelock Type</th>
