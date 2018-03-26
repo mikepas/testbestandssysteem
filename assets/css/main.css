@@ -5,3 +5,19 @@
 .table th, td {
     padding: .50rem !important;
 }
+
+.search-table {
+    width: 670px;
+}
+
+.stretch-input {
+    width: 100%;
+}
+
+.stretch-input * {
+    width: 100%;
+}
+
+.col-1-width {
+    min-width: 200px;
+}

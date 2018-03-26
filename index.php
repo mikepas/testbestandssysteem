@@ -37,10 +37,7 @@ $list = $syno->GetList( array('method' => 'list', 'version' => 2, 'sort_by' => '
                         <input type='hidden'  id='open' name='open' value='<?php echo $path; ?>'>
                         <button type='submit' class='btn btn-link'><img src="assets/images/reload.png" class="icon"/></button>
                     </form>
-                    <form method='post' class="float-right" style="margin: 15px;">
-                        <input type='hidden'  id='open' name='open' value=''>
-                        <button type='submit' class='btn btn-link'><img src="assets/images/search.png" class="icon"/></button>
-                    </form>
+                    <a href="search.php?path=<?php echo $root; ?>" style="margin: 15px;" class='float-right'><img src="assets/images/search.png" style="margin: 9px" class="icon"/></a>
                 </div>
             </div>
 

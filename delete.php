@@ -7,7 +7,12 @@ if (!isset($_GET['path'])) {
 
 require_once('syno.php');
 
-$syno = new Synology();
+try {
+    $syno = new Synology();
+} catch (Exception $e) {
+    echo "kon niet verbinden met het bestandssysteem.";
+    die;
+}
 
 $deleteParams = array(
     'method' => 'start',

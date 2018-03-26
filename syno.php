@@ -53,7 +53,7 @@ class Synology {
         try {
             $this->Login();
         } catch (Exception $e) {
-            echo "login failed";
+            echo "kon niet verbinden met het bestandssysteem.";
             die;
         }
         //var_dump($this->download());

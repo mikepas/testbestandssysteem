@@ -14,14 +14,14 @@ $readableCrTime = date("H:i:s\ d-m-Y ", $crtime);
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
-    <title>testbestandssysteem</title>
+    <link rel="stylesheet" href="assets/css/bootstrap.min.css">
+    <title>test bestandssysteem</title>
 </head>
 <body>
     <div class="container">
         <div class="row">
             <div class="col-md-1">
-                <a style='cursor: pointer;' onclick="window.history.back();"> <i class="fas fa-arrow-left fa-2x" style="margin-top: 10px;"></i></a>
+                <a style='cursor: pointer;' onclick="window.history.back();"><img src="assets/images/back.png" style="margin-top: 5px;"/></i></a>
             </div>
             <div class="col-md-11">
                 <h1>Info over <?php echo ($item->isdir ? "de folder " : "het bestand "); ?><?php echo $item->name; ?></h1>
@@ -54,7 +54,5 @@ $readableCrTime = date("H:i:s\ d-m-Y ", $crtime);
             <input type="submit" class="btn btn-primary float-right">Aanpassen</input>
         </form>
     </div>
-    <script defer src="https://use.fontawesome.com/releases/v5.0.8/js/solid.js" integrity="sha384-+Ga2s7YBbhOD6nie0DzrZpJes+b2K1xkpKxTFFcx59QmVPaSA8c7pycsNaFwUK6l" crossorigin="anonymous"></script>
-    <script defer src="https://use.fontawesome.com/releases/v5.0.8/js/fontawesome.js" integrity="sha384-7ox8Q2yzO/uWircfojVuCQOZl+ZZBg2D2J5nkpLqzH1HY0C1dHlTKIbpRz/LG23c" crossorigin="anonymous"></script>
 </body>
 </html>
