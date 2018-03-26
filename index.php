@@ -98,6 +98,9 @@ $list = $syno->GetList( array('method' => 'list', 'version' => 2, 'sort_by' => '
                         } else {
                             $type = "bestand";
                             $openUrl = "#";
+                            $fileType = strtolower($item->additional->type);
+                            //var_dump($item);
+                            //die;
 
                             $bytes = $item->additional->size;
                             $size = array('b','kB','MB','GB','TB','PB','EB','ZB','YB');
@@ -106,11 +109,11 @@ $list = $syno->GetList( array('method' => 'list', 'version' => 2, 'sort_by' => '
 
                             $officeExtensions = ['docx', 'xls', 'csv'];
 
-                            if (in_array(pathinfo($item->name, PATHINFO_EXTENSION), $officeExtensions)) {
-                                if (pathinfo($item->name, PATHINFO_EXTENSION) == 'csv' || pathinfo($item->name, PATHINFO_EXTENSION) == 'xls') {
+                            if (in_array($fileType, $officeExtensions)) {
+                                if ($fileType == 'csv' || $fileType == 'xls') {
                                     $openUrl = "ms-excel:ofe|u|http://192.168.5.220:5005$item->path";
 
-                                } else if (pathinfo($item->name, PATHINFO_EXTENSION) == 'docx') {
+                                } else if ($fileType == 'docx') {
                                     $openUrl = "ms-word:ofe|u|http://192.168.5.220:5005$item->path";
                                 }
                             } else {
