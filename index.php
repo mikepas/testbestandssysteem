@@ -1,44 +1,21 @@
 <?php
-/*
-error_reporting(0);
-
-require('webdav_client.php');
-
-$wdc = new webdav_client();
-$wdc->set_server('192.168.5.220');
-$wdc->set_port(5005);
-$wdc->set_user('admin');
-$wdc->set_pass('');
-// use HTTP/1.1
-$wdc->set_protocol(1);
-// enable debugging
-$wdc->set_debug(false);
-
-
-if (!$wdc->open()) {
-    print 'Error: could not open server connection';
-    exit;
-}
-
-// check if server supports webdav rfc 2518
-if (!$wdc->check_webdav()) {
-    print 'Error: server does not support webdav or user/password may be wrong';
-    exit;
-}
-
-//$dir = $wdc->ls('/test');
-//print_r($dir);
-
-$http_status = $wdc->get('/test/childtest/grandchildtest/tekst2site.docx', $buffer);
-print_r($http_status);
-*/
 require_once('syno.php');
 
-$syno = new Synology();
+try {
+    $syno = new Synology();
+} catch (Exception $e) {
+    echo "kon niet verbinden met het bestandssysteem.";
+    die;
+}
 
-$path = "/test";
+$root = "/test";
+$path = $root;
+
 if (isset($_POST['open']) && $_POST['open'] != null) $path = $_POST['open'];
+
 $backUrl = substr($path, 0, strrpos($path, "/"));
+
+$list = $syno->GetList( array('method' => 'list', 'version' => 2, 'sort_by' => 'type', 'additional' => '["real_path", "size", "owner", "time", "perm", "mount_point_type", "type"]'), $path)->data->files;
 ?>
 <!DOCTYPE html>
 <html>
@@ -56,54 +33,49 @@ $backUrl = substr($path, 0, strrpos($path, "/"));
                     <h1>Testomgeving bestandssysteem</h1>
                 </div>
                 <div class="col-md-3">
-                    <a onclick="window.location.reload(true);" class="float-right" style="margin: 15px; cursor: pointer;">
-                        <img src="assets/images/reload.png" class="icon"/>
-                    </a>
-                    <a class="float-right" style="margin: 15px; cursor: pointer;">
-                        <img src="assets/images/search.png" class="icon"/>
-                    </a>
+                    <form method='post' class="float-right" style="margin: 15px;">
+                        <input type='hidden'  id='open' name='open' value='<?php echo $path; ?>'>
+                        <button type='submit' class='btn btn-link'><img src="assets/images/reload.png" class="icon"/></button>
+                    </form>
+                    <form method='post' class="float-right" style="margin: 15px;">
+                        <input type='hidden'  id='open' name='open' value=''>
+                        <button type='submit' class='btn btn-link'><img src="assets/images/search.png" class="icon"/></button>
+                    </form>
                 </div>
             </div>
-            <br/>
-            <!--<table class="table">
-                <th>Filename</th><th>Size</th><th>Creationdate</th><th>Resource Type</th><th>Content Type</th><th>Activelock Depth</th><th>Activelock Owner</th><th>Activelock Token</th><th>Activelock Type</th>
-                <?php
-                /*foreach($dir as $e) {
-                    $ts = $wdc->iso8601totime($e['creationdate']);
-                    $line = sprintf('<tr><td>%s&nbsp;</td><td>%s&nbsp;</td><td>%s&nbsp;</td><td>%s&nbsp;</td><td>%s&nbsp;</td><td>%s&nbsp;</td><td>%s&nbsp;</td><td>%s&nbsp;</td><td>%s&nbsp;</td></tr>',
-                        $e['href'],
-                        $e['getcontentlength'],
-                        date('d.m.Y H:i:s',$ts),
-                        $e['resourcetype'],
-                        $e['getcontenttype'],
-                        $e['activelock_depth'],
-                        $e['activelock_owner'],
-                        $e['activelock_token'],
-                        $e['activelock_type']
-                    );
-                    print urldecode($line);
-                }*/
-                ?>
-            </table>-->
-            <div><h4 style="text-align: center;"><?php echo ltrim($path, "/"); ?></h4></div>
-            <table class="table table-hover">
-                <tr>
-                    <th></th>
-                    <th>Name</th>
-                    <th>Type</th>
-                    <th>Size</th>
-                    <th>Owner</th>
-                    <th></th>
-                    <th></th>
-                    <th></th>
-                    <th></th>
-                </tr>
-                <?php
-                if ($path != "/test") echo "<tr><td><img src='assets/images/folder.png' class='icon'/></td><td><a style='cursor: pointer;' href='' onclick=\"openFolder('$backUrl');\">. . .</a></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>";
 
-                $list = $syno->GetList( array('method' => 'list', 'version' => 2, 'sort_by' => 'type', 'additional' => '["real_path", "size", "owner", "time", "perm", "mount_point_type", "type"]'), $path)->data->files;
+            <br/>
+
+            <h4 style="text-align: center;"><?php echo ltrim($path, "/"); ?></h4>
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th></th>
+                        <th>Name</th>
+                        <th>Type</th>
+                        <th>Size</th>
+                        <th>Owner</th>
+                        <th></th>
+                        <th></th>
+                        <th></th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <?php
+                if ($path != $root) {
+                    echo "<tr><td><img src='assets/images/folder.png' class='icon'/></td>
+                            <td>
+                                <form method='post'>
+                                    <input type='hidden'  id='open' name='open' value='$backUrl'>
+                                    <button type='submit' class='btn btn-link' style='padding:0;'> . . . </button>
+                                </form>
+                            </td>
+                            <td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>";
+                }
 
                 foreach ($list as $item) {
+                    $downloadUrl = $syno->download('entry.cgi', 'SYNO.FileStation.Download', array('method' => 'download', 'version' => 2, 'mode' => '"download"'), $item->path);
+
                     if (substr($item->name, 0, 1) !== "#") {
                         $owner = $item->additional->owner->user;
                         $info = json_encode($item);
@@ -118,14 +90,13 @@ $backUrl = substr($path, 0, strrpos($path, "/"));
                                     <td>
                                         <form method='post'>
                                             <input type='hidden'  id='open' name='open' value='$item->path'>
-                                            <button type='submit' class='btn btn-link' style='padding:0px;'>$item->name</button>
+                                            <button type='submit' class='btn btn-link' style='padding:0;'>$item->name</button>
                                         </form>
                                     </td>
                                     <td>$type</td>
                                     <td></td>";
                         } else {
                             $type = "bestand";
-                            //$openInOffice = false;
                             $openUrl = "#";
 
                             $bytes = $item->additional->size;
@@ -134,42 +105,36 @@ $backUrl = substr($path, 0, strrpos($path, "/"));
                             $size = sprintf("%.2f", $bytes / pow(1024, $factor)) . " " . @$size[$factor];
 
                             $officeExtensions = ['docx', 'xls', 'csv'];
-                            //if (in_array(pathinfo($item->name, PATHINFO_EXTENSION), $officeExtensions)) $openInOffice = true;
 
-                            //if (!$openInOffice) {
-                                if (in_array(pathinfo($item->name, PATHINFO_EXTENSION), $officeExtensions)) {
-                                    if (pathinfo($item->name, PATHINFO_EXTENSION) == 'csv' || pathinfo($item->name, PATHINFO_EXTENSION) == 'xls') {
-                                        $openUrl = "ms-excel:ofe|u|http://192.168.5.220:5005$item->path";
+                            if (in_array(pathinfo($item->name, PATHINFO_EXTENSION), $officeExtensions)) {
+                                if (pathinfo($item->name, PATHINFO_EXTENSION) == 'csv' || pathinfo($item->name, PATHINFO_EXTENSION) == 'xls') {
+                                    $openUrl = "ms-excel:ofe|u|http://192.168.5.220:5005$item->path";
 
-                                    } else if (pathinfo($item->name, PATHINFO_EXTENSION) == 'docx') {
-                                        $openUrl = "ms-word:ofe|u|http://192.168.5.220:5005$item->path";
-                                    }
-                                } else {
-                                    $openUrl = $syno->download('entry.cgi', 'SYNO.FileStation.Download', array('method' => 'download', 'version' => 2, 'mode' => '"open"'), $item->path);
+                                } else if (pathinfo($item->name, PATHINFO_EXTENSION) == 'docx') {
+                                    $openUrl = "ms-word:ofe|u|http://192.168.5.220:5005$item->path";
                                 }
-                            //}
+                            } else {
+                                $openUrl = $syno->download('entry.cgi', 'SYNO.FileStation.Download', array('method' => 'download', 'version' => 2, 'mode' => '"open"'), $item->path);
+                            }
 
                             echo "
                                 <tr>
                                     <td><img src='assets/images/file.png' class='icon'/></td>
-                                    <!--<td><a href='$openUrl' onclick='edit(\"$path\", \"$item->name\", this)'>$item->name</a></td>-->
                                     <td><a href='$openUrl'>$item->name</a></td>
                                     <td>$type</td>
                                     <td>$size</td>";
                         }
 
-                        $downloadUrl = $syno->download('entry.cgi', 'SYNO.FileStation.Download', array('method' => 'download', 'version' => 2, 'mode' => '"download"'), $item->path);
-
                         echo "  <td>$owner</td>
                                 <td>
                                     <form action='info.php' method='post'>
                                         <input type='hidden' name='item' value='$info'/>
-                                        <button type='submit' class='btn btn-link' style='padding:0px;'>Info</button>
+                                        <button type='submit' class='btn btn-link' style='padding:0;'>Info</button>
                                     </form>
                                 </td>
                                 <td><a href='$downloadUrl'>Download</a></td>
                                 <td><a href='delete.php?path=$item->path' onclick=\"return  confirm('Weet je zeker dat je $item->name wilt verwijderen?')\">Delete</a></td>
-                                <td><a href='#'>Link</a></td></tr>";
+                                <td>".(($item->isdir) ? '' : '<a href="link.php">Link</a>')."</td></tr>";
                     }
                 }
                 ?>
@@ -195,65 +160,6 @@ $backUrl = substr($path, 0, strrpos($path, "/"));
                 <br/>
                 <input type="submit" value="Uploaden" class="btn btn-primary">
             </form>
-
-            <form method="post" name="redirect" id="redirect">
-                <input type="hidden" id="open" name="open" value="">
-                <input type="submit" style="display: none;">
-            </form>
         </div>
-
-        <!--<script type="text/javascript" src="ITHitWebDAVClient.js" ></script>
-        <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
-        <script src="assets/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
-        <script type="text/javascript">
-            function openFolder(path) {
-                document.getElementById("open").value = path;
-                console.log(document.getElementById("open").value);
-                document.getElementById("redirect").submit();
-            }
-
-            function edit(path, filename, event) {
-                var filePath = path + "/" + filename;
-
-                //ITHit.WebDAV.Client.DocManager.DavProtocolEditDocument(
-                    //filePath,                                 // Document URL(s)
-                    //path,                                     // Mount URL
-                    //errorCallback(),                          // Function to call if protocol app is not installed
-                    //null,                                     // Reserved
-                    //'Current',                                // Which browser to copy cookies from: 'Current', 'All', 'None'
-                    //'.AspNet.ApplicationCookie',              // Cookie(s) to copy.
-                    //'/',                                      // URL to navigate to if any cookie from the list is not found.
-                    //'Edit'                                    // Command to execute: 'Edit', 'OpenWith'
-                //);
-
-                //var sDocumentUrl = "http://192.168.5.220:5005" + path;
-                //var ns = ITHit.WebDAV.Client;
-                //var oNs = ITHit.WebDAV.Client.DocManager;
-                //var session = new ns.WebDavSession();
-                //console.log(session);
-                //if (oNs.IsMicrosoftOfficeDocument(sDocumentUrl)) {
-                    //oNs.MicrosoftOfficeEditDocument(sDocumentUrl, errorCallback());
-                //} else {
-                    //oNs.DavProtocolEditDocument(sDocumentUrl, null, errorCallback());
-                //}
-
-                let href = window.location.href;
-                if (!href.indexOf("#")) {
-                    href += "#";
-                }
-                if (href !== event.href) return;
-
-                ITHit.WebDAV.Client.DocManager.EditDocument("http://192.168.5.220:5005" + filePath, "http://192.168.5.220:5005/", errorCallback);
-            }
-
-            function errorCallback() {
-                //let installerFilePath = "Plugins/" + ITHit.WebDAV.Client.DocManager.GetInstallFileName();
-
-                //if (confirm("Opening this type of file requires a protocol installation. Select OK to download the protocol installer.")){
-                    //window.open(installerFilePath);
-                //}
-            }
-        </script>-->
     </body>
 </html>
