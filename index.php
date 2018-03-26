@@ -26,20 +26,18 @@ if (!$wdc->check_webdav()) {
     exit;
 }
 
-$dir = $wdc->ls('/test');
+//$dir = $wdc->ls('/test');
 //print_r($dir);
 
-//$http_status = $wdc->get('/test/childtest/grandchildtest/tekst2site.docx', $buffer);
-//print 'webdav server returns ' . $http_status . '. Buffer is filled with ' . strlen($buffer). ' Bytes.<br>';
+$http_status = $wdc->get('/test/childtest/grandchildtest/tekst2site.docx', $buffer);
+print_r($http_status);
 */
-
 require_once('syno.php');
 
 $syno = new Synology();
 
 $path = "/test";
 if (isset($_POST['open']) && $_POST['open'] != null) $path = $_POST['open'];
-unset($_POST);
 $backUrl = substr($path, 0, strrpos($path, "/"));
 ?>
 <!DOCTYPE html>
@@ -47,10 +45,9 @@ $backUrl = substr($path, 0, strrpos($path, "/"));
     <head>
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
-        <script src="assets/js/fa-solid.js"></script>
-        <script src="assets/js/fontawesome.js"></script>
-        <title>testbestandssysteem</title>
+        <link rel="stylesheet" href="assets/css/bootstrap.min.css">
+        <link rel="stylesheet" href="assets/css/main.css">
+        <title>test bestandssysteem</title>
     </head>
     <body>
         <div class="container">
@@ -59,15 +56,14 @@ $backUrl = substr($path, 0, strrpos($path, "/"));
                     <h1>Testomgeving bestandssysteem</h1>
                 </div>
                 <div class="col-md-3">
-                    <button onclick="window.location.reload(true);" class="btn btn-success float-right" style="margin: 10px;">
-                        <i class="fas fa-sync"></i>
-                    </button>
-                    <button class="btn btn-primary float-right" style="margin: 10px;">
-                        <i class="fas fa-search"></i>
-                    </button>
+                    <a onclick="window.location.reload(true);" class="float-right" style="margin: 15px; cursor: pointer;">
+                        <img src="assets/images/reload.png" class="icon"/>
+                    </a>
+                    <a class="float-right" style="margin: 15px; cursor: pointer;">
+                        <img src="assets/images/search.png" class="icon"/>
+                    </a>
                 </div>
             </div>
-            <a href="ms-word:ofe|u|http://192.168.5.220:5005/test/childtest/grandchildtest/tekst2site.docx">test</a>
             <br/>
             <!--<table class="table">
                 <th>Filename</th><th>Size</th><th>Creationdate</th><th>Resource Type</th><th>Content Type</th><th>Activelock Depth</th><th>Activelock Owner</th><th>Activelock Token</th><th>Activelock Type</th>
@@ -90,7 +86,7 @@ $backUrl = substr($path, 0, strrpos($path, "/"));
                 ?>
             </table>-->
             <div><h4 style="text-align: center;"><?php echo ltrim($path, "/"); ?></h4></div>
-            <table class="table">
+            <table class="table table-hover">
                 <tr>
                     <th></th>
                     <th>Name</th>
@@ -103,7 +99,7 @@ $backUrl = substr($path, 0, strrpos($path, "/"));
                     <th></th>
                 </tr>
                 <?php
-                if ($path != "/test") echo "<tr><td><a style='cursor: pointer;' onclick=\"openFolder('$backUrl');\"><i class='fas fa-arrow-left fa-lg'></i></a></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>";
+                if ($path != "/test") echo "<tr><td><img src='assets/images/folder.png' class='icon'/></td><td><a style='cursor: pointer;' href='' onclick=\"openFolder('$backUrl');\">. . .</a></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>";
 
                 $list = $syno->GetList( array('method' => 'list', 'version' => 2, 'sort_by' => 'type', 'additional' => '["real_path", "size", "owner", "time", "perm", "mount_point_type", "type"]'), $path)->data->files;
 
@@ -117,31 +113,47 @@ $backUrl = substr($path, 0, strrpos($path, "/"));
 
                             echo "
                                 <tr>
-                                    <td><i class='fas fa-folder-open fa-lg'></i></td>
-                                    <td><a href='#' onclick=\"openFolder('$item->path');\">$item->name</a></td>
+                                    <td><img src='assets/images/folder.png' class='icon'/></i></td>
+                                    <!--<td><a href='#' onclick=\"openFolder('$item->path');\">$item->name</a></td>-->
+                                    <td>
+                                        <form method='post'>
+                                            <input type='hidden'  id='open' name='open' value='$item->path'>
+                                            <button type='submit' class='btn btn-link' style='padding:0px;'>$item->name</button>
+                                        </form>
+                                    </td>
                                     <td>$type</td>
                                     <td></td>";
                         } else {
                             $type = "bestand";
-                            $openInOffice = false;
+                            //$openInOffice = false;
                             $openUrl = "#";
 
                             $bytes = $item->additional->size;
-                            $size = array('bytes','kB','MB','GB','TB','PB','EB','ZB','YB');
+                            $size = array('b','kB','MB','GB','TB','PB','EB','ZB','YB');
                             $factor = floor((strlen($bytes) - 1) / 3);
                             $size = sprintf("%.2f", $bytes / pow(1024, $factor)) . " " . @$size[$factor];
 
-                            $officeExtensions = ['docx', 'xls'];
-                            if (in_array(pathinfo($item->name, PATHINFO_EXTENSION), $officeExtensions)) $openInOffice = true;
+                            $officeExtensions = ['docx', 'xls', 'csv'];
+                            //if (in_array(pathinfo($item->name, PATHINFO_EXTENSION), $officeExtensions)) $openInOffice = true;
 
-                            if (!$openInOffice) {
-                                $openUrl = $syno->download('entry.cgi', 'SYNO.FileStation.Download', array('method' => 'download', 'version' => 2, 'mode' => '"open"'), $item->path);
-                            }
+                            //if (!$openInOffice) {
+                                if (in_array(pathinfo($item->name, PATHINFO_EXTENSION), $officeExtensions)) {
+                                    if (pathinfo($item->name, PATHINFO_EXTENSION) == 'csv' || pathinfo($item->name, PATHINFO_EXTENSION) == 'xls') {
+                                        $openUrl = "ms-excel:ofe|u|http://192.168.5.220:5005$item->path";
+
+                                    } else if (pathinfo($item->name, PATHINFO_EXTENSION) == 'docx') {
+                                        $openUrl = "ms-word:ofe|u|http://192.168.5.220:5005$item->path";
+                                    }
+                                } else {
+                                    $openUrl = $syno->download('entry.cgi', 'SYNO.FileStation.Download', array('method' => 'download', 'version' => 2, 'mode' => '"open"'), $item->path);
+                                }
+                            //}
 
                             echo "
                                 <tr>
-                                    <td><i class='fas fa-file fa-lg'></i></td>
-                                    <td><a href='$openUrl' onclick='edit(\"$path\", \"$item->name\", this)'>$item->name</a></td>
+                                    <td><img src='assets/images/file.png' class='icon'/></td>
+                                    <!--<td><a href='$openUrl' onclick='edit(\"$path\", \"$item->name\", this)'>$item->name</a></td>-->
+                                    <td><a href='$openUrl'>$item->name</a></td>
                                     <td>$type</td>
                                     <td>$size</td>";
                         }
@@ -190,7 +202,7 @@ $backUrl = substr($path, 0, strrpos($path, "/"));
             </form>
         </div>
 
-        <script type="text/javascript" src="ITHitWebDAVClient.js" ></script>
+        <!--<script type="text/javascript" src="ITHitWebDAVClient.js" ></script>
         <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
         <script src="assets/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
@@ -242,6 +254,6 @@ $backUrl = substr($path, 0, strrpos($path, "/"));
                     //window.open(installerFilePath);
                 //}
             }
-        </script>
+        </script>-->
     </body>
 </html>

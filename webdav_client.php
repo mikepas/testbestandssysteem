@@ -1309,7 +1309,7 @@ class webdav_client {
             $this->_error_log('Connection: close found');
             $this->_connection_closed = true;
         }
-        print_r($header);
+        //print_r($header);
         // check how to get the data on socket stream
         // chunked or content-length (HTTP/1.1) or
         // one block until feof is received (HTTP/1.0)
