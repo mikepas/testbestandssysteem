@@ -21,3 +21,7 @@
 .col-1-width {
     min-width: 200px;
 }
+
+.new-folder {
+    padding: 0;
+}

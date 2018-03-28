@@ -3,11 +3,13 @@ if (!isset($_POST['item'])) {
     echo "No item detected.";
     die;
 }
+
+require_once('functions.php');
 $item = json_decode($_POST['item']);
-$atime = $item->additional->time->atime;
-$crtime = $item->additional->time->crtime;
-$readableATime = date("H:i:s\ d-m-Y ", $atime);
-$readableCrTime = date("H:i:s\ d-m-Y ", $crtime);
+$name = preg_replace('/\\.[^.\\s]{3,4}$/', '', $item->name);
+$readableATime = formatTime($item->additional->time->atime);
+$readableCrTime = formatTime($item->additional->time->crtime);
+$size = calculateBytes($item->additional->size);
 ?>
 <!DOCTYPE html>
 <html>
@@ -28,30 +30,42 @@ $readableCrTime = date("H:i:s\ d-m-Y ", $crtime);
             </div>
         </div>
         <br/>
-        <form method="post" action="">
+        <form method="post" action="rename.php">
             <table class="table">
                 <tr>
                     <td>Naam:</td>
-                    <td><input type="text" value='<?php echo $item->name; ?>'/></td>
+                    <td>
+                        <input type="text" name="name" value='<?php echo $name; ?>'/>
+                        <input type="hidden" name="filepath" value='<?php echo $item->path; ?>'/>
+                        <input type="hidden" name="type" value='<?php echo (($item->isdir) ? 'folder' : strtolower($item->additional->type)); ?>'/>
+                    </td>
                 </tr>
                 <tr>
-                    <td>Owner:</td>
-                    <td><input type="text" value='<?php echo $item->additional->owner->user; ?>'/></td>
+                    <td>Extensie:</td>
+                    <td><?php echo (($item->isdir) ? 'folder' : strtolower($item->additional->type)); ?></td>
                 </tr>
                 <tr>
-                    <td>Size:</td>
-                    <td><input type="text" value='<?php echo $item->additional->size; ?>'/></td>
+                    <td>Locatie:</td>
+                    <td><?php echo $item->path; ?></td>
+                </tr>
+                <tr>
+                    <td>Eigenaar:</td>
+                    <td><?php echo $item->additional->owner->user; ?></td>
+                </tr>
+                <tr>
+                    <td>Grootte:</td>
+                    <td><?php echo $size; ?></td>
                 </tr>
                 <tr>
                     <td>Laatst geopend op:</td>
-                    <td><input type="text" value='<?php echo $readableATime; ?>'/></td>
+                    <td><?php echo $readableATime; ?></td>
                 </tr>
                 <tr>
                     <td>Aangemaakt op:</td>
-                    <td><input type="text" value='<?php echo $readableCrTime; ?>'/></td>
+                    <td><?php echo $readableCrTime; ?></td>
                 </tr>
             </table>
-            <input type="submit" class="btn btn-primary float-right">Aanpassen</input>
+            <input type="submit" name="submit" class="btn btn-primary float-right" value="Naam wijzigen">
         </form>
     </div>
 </body>

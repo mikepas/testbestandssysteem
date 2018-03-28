@@ -134,13 +134,26 @@ class Synology {
         return json_decode($this->_request('entry.cgi', 'SYNO.FileStation.CheckPermission', array('method' => 'write', 'version' => 3, 'path' => '"/test"', 'filename' => '"test.zip"', 'overwrite' => 'true')));
     }
 
-    public function download($path, $api, $params = array(), $filePath) {
+    public function download($params = array(), $filePath) {
         $params = array_merge(array(
-            'api' => $api,
-            'version' => 1,
+            'api' => 'SYNO.FileStation.Download',
             '_sid' => '"'.$this->sid.'"',
             'path' => $filePath,
         ), $params);
-        return ($this->https ? 'https' : 'http') . '://' . $this->hostname . ':' . $this->port . '/webapi/' . $path . '?' . http_build_query($params);
+        return ($this->https ? 'https' : 'http') . '://' . $this->hostname . ':' . $this->port . '/webapi/entry.cgi?' . http_build_query($params);
+    }
+
+    public function newFolder($path, $api, $params = array(), $filePath) {
+
+    }
+
+    public function rename($filePath, $name) {
+        $params = array_merge(array(
+            'version' => 2,
+            'method' => 'rename',
+            'path' => '["'.$filePath.'"]',
+            'name' => '["'.$name.'"]'
+        ));
+        return json_decode($this->_request('entry.cgi', 'SYNO.FileStation.Rename', $params));
     }
 }
