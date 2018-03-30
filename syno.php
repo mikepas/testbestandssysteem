@@ -84,7 +84,7 @@ class Synology {
         //Common error
         if ($object != null) {
             if (!$object->success && array_key_exists($object->error->code, $this->common_error_codes)) {
-                //echo $this->common_error_codes[$object->error->code]."</br>";
+                echo $this->common_error_codes[$object->error->code]."</br>";
             }
         }
 
@@ -111,6 +111,10 @@ class Synology {
         return $this->_request('query.cgi', 'SYNO.API.Info', array('query' => $query, 'method' => 'Query'));
     }
 
+    public function FileStationInfo() {
+        return $this->_request('entry.cgi', 'SYNO.FileStation.Info', array('method' => 'get', 'version' => 2));
+    }
+
     public function GetList($params = array(), $path) {
         $params = array_merge(array(
             'folder_path' => $path,
@@ -118,20 +122,14 @@ class Synology {
         return json_decode($this->_request('entry.cgi', 'SYNO.FileStation.List', $params));
     }
 
-    public function FileStationInfo() {
-        return $this->_request('entry.cgi', 'SYNO.FileStation.Info', array('method' => 'get', 'version' => 2));
-    }
-
-    public function coreUser() {
-        return json_decode($this->_request('entry.cgi', 'SYNO.FileStation.UserGrp', array('method' => 'get', 'version' => 1)));
-    }
-
-    public function getThumb() {
-        return $this->_request('entry.cgi', 'SYNO.FileStation.Thumb', array('method' => 'get', 'version' => 2, 'path' => '"/test/childtest/Logo_feetfirstson.png"'));
-    }
-
-    public function checkPermission() {
-        return json_decode($this->_request('entry.cgi', 'SYNO.FileStation.CheckPermission', array('method' => 'write', 'version' => 3, 'path' => '"/test"', 'filename' => '"test.zip"', 'overwrite' => 'true')));
+    public function GetFileInfo($path) {
+        $params = array_merge(array(
+            'version' => 2,
+            'method' => 'getinfo',
+            'additional' => '["real_path", "size", "owner", "time", "perm", "mount_point_type", "type"]',
+            'path' => '["'.$path.'"]'
+        ));
+        return $this->_request('entry.cgi', 'SYNO.FileStation.List', $params);
     }
 
     public function download($params = array(), $filePath) {
@@ -143,10 +141,6 @@ class Synology {
         return ($this->https ? 'https' : 'http') . '://' . $this->hostname . ':' . $this->port . '/webapi/entry.cgi?' . http_build_query($params);
     }
 
-    public function newFolder($path, $api, $params = array(), $filePath) {
-
-    }
-
     public function rename($filePath, $name) {
         $params = array_merge(array(
             'version' => 2,
@@ -155,5 +149,40 @@ class Synology {
             'name' => '["'.$name.'"]'
         ));
         return json_decode($this->_request('entry.cgi', 'SYNO.FileStation.Rename', $params));
+    }
+
+    function upload() {
+        $filename = $_FILES['file']['name'];
+        $filedata = $_FILES['file']['tmp_name'];
+        $data = array ( "api" => 'SYNO.FileStation.Upload',
+            "version" => "2",
+            "method" => "upload",
+            "path" => $_POST['path'],
+            "create_parents" => 'true',
+            'file' => curl_file_create($filedata, $_FILES['file']['type'], $filename),
+            "filename" => $filename);
+
+        $ch = curl_init();
+        curl_setopt($ch, CURLOPT_URL, "http://192.168.5.220:5000/webapi/entry.cgi?_sid=$this->sid");
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+        curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
+        curl_setopt($ch, CURLOPT_POST, true);
+        curl_setopt($ch, CURLOPT_POSTFIELDS, $data);
+        curl_setopt($ch, CURLOPT_HTTPHEADER, array("Content-Type:multipart/form-data"));
+        $response = json_decode(curl_exec($ch));
+        if ($response->success == false) {
+            if ($response->error->code == "414") echo "<p class='error'>Het bestand bestaat al.</p>";
+        }
+        curl_close($ch);
+    }
+
+    function createFolder($path, $name) {
+        $params = array_merge(array(
+            'version' => 2,
+            'method' => 'create',
+            'folder_path' => '["'.$path.'"]',
+            'name' => '["'.$name.'"]'
+        ));
+        return json_decode($this->_request('entry.cgi', 'SYNO.FileStation.CreateFolder', $params));
     }
 }

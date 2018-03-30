@@ -30,7 +30,7 @@ $statusParams = array(
 
 $statusResponse = json_decode($syno->_request('entry.cgi', 'SYNO.FileStation.Delete', $statusParams));
 
-if ($statusResponse->data->path != "") header('Location: http://localhost/testbestandssysteem/');
+if ($statusResponse->success) header('Location: http://localhost/testbestandssysteem/');
 
 ?>
 

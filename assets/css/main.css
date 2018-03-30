@@ -25,3 +25,7 @@
 .new-folder {
     padding: 0;
 }
+
+.error {
+    color: red;
+}

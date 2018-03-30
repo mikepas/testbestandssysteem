@@ -1,8 +1,24 @@
 <?php
+require_once('syno.php');
+require_once('functions.php');
 
-if (isset($_POST['search']) && isset($_GET['path'])) {
+if (isset($_POST['search'])) {
+    $path = '/test';
+    $name = '';
+    $createDateFrom = '';
+    $createDateTo = '';
+    $createName = '';
+    $changeDateFrom = '';
+    $changeDateTo = '';
+    $changeName = '';
 
-    require_once('syno.php');
+    if (isset($_POST['name'])) $name = $_POST['name'];
+    if (isset($_POST['create_date_from'])) $createDateFrom = $_POST['create_date_from'];
+    if (isset($_POST['create_date_to'])) $createDateTo = $_POST['create_date_to'];
+    if (isset($_POST['create_name'])) $createName = $_POST['create_name'];
+    if (isset($_POST['change_date_from'])) $changeDateFrom = $_POST['change_date_from'];
+    if (isset($_POST['change_date_to'])) $changeDateTo = $_POST['change_date_to'];
+    if (isset($_POST['change_name'])) $changeName = $_POST['change_name'];
 
     try {
         $syno = new Synology();
@@ -14,8 +30,8 @@ if (isset($_POST['search']) && isset($_GET['path'])) {
     $searchParams = array(
         'method' => 'start',
         'version' => 2,
-        'folder_path' => '"' . $_GET['path'] . '"',
-        'pattern' => '1'
+        'folder_path' => '"' . $path . '"',
+        'pattern' => $name
     );
 
     $searchResponse = json_decode($syno->_request('entry.cgi', 'SYNO.FileStation.Search', $searchParams));
@@ -24,18 +40,11 @@ if (isset($_POST['search']) && isset($_GET['path'])) {
         'method' => 'list',
         'version' => 2,
         'taskid' => '"' . $searchResponse->data->taskid . '"',
-        'additional' => '["owner"]',
+        'additional' => '["size"]',
         'limit' => '-1'
     );
 
-    $listResponse = json_decode($syno->_request('entry.cgi', 'SYNO.FileStation.Search', $listParams));
-
-    var_dump($listResponse);
-    die;
-
-    if ($listResponse->data->path != "") header('Location: http://localhost/testbestandssysteem/');
-} else if (isset($_POST['search']) && !isset($_GET['path'])) {
-    echo "<script type='text/javascript'>alert('Er is geen filepath meegegeven.');</script>";
+    $listResponse = json_decode($syno->_request('entry.cgi', 'SYNO.FileStation.Search', $listParams))->data->files;
 }
 ?>
 <!DOCTYPE html>
@@ -89,6 +98,10 @@ if (isset($_POST['search']) && isset($_GET['path'])) {
                 </tr>
             </table>
         </form>
+        <br/>
+        <div style="border: #000 1px solid; height: 1px;" class="container-fluid"></div>
+        <br/>
+        <?php if (isset($_POST['search'])) ShowTable('/test', '/test', $syno, $listResponse); ?>
     </div>
 </body>
 </html>
