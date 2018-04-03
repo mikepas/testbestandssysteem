@@ -3,9 +3,9 @@
 class Synology {
     private $username;
     private $password;
-    private $protocol;
-    private $hostname;
-    private $port;
+    public $protocol;
+    public $hostname;
+    public $port;
     private $https;
     private $session;
     public $sid = null;
@@ -34,7 +34,7 @@ class Synology {
      * @param string $session
      * @throws Exception
      */
-    function __construct($username = 'admin', $password = '', $protocol = 'http', $hostname = '192.168.5.220', $port = 5000, $https = false, $session = 'FileStation') {
+    function __construct($username = 'admin', $password = '', $protocol = 'http', $hostname = '', $port = 5000, $https = false, $session = 'FileStation') {
         $this->username = $username;
         $this->password = $password;
         $this->protocol = $protocol;
@@ -163,7 +163,7 @@ class Synology {
             "filename" => $filename);
 
         $ch = curl_init();
-        curl_setopt($ch, CURLOPT_URL, "http://192.168.5.220:5000/webapi/entry.cgi?_sid=$this->sid");
+        curl_setopt($ch, CURLOPT_URL, "http://$this->hostname/webapi/entry.cgi?_sid=$this->sid");
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
         curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
         curl_setopt($ch, CURLOPT_POST, true);

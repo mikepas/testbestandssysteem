@@ -15,7 +15,8 @@ $path = $root;
 
 if (isset($_POST['open']) && $_POST['open'] != null) $path = $_POST['open'];
 
-if(isset($_POST['submit'])) $syno->upload();
+if(isset($_POST['upload'])) $syno->upload();
+if(isset($_POST['newfolder'])) $syno->createFolder($path, $_POST['foldername']);
 ?>
 <!DOCTYPE html>
 <html>
@@ -43,14 +44,29 @@ if(isset($_POST['submit'])) $syno->upload();
             <br/>
             <div style="border: #000 1px solid; height: 1px;" class="container-fluid"></div>
             <br/>
-            <h3>Uploaden naar de map <?php echo substr($path, strrpos($path, '/') + 1); ?></h3>
-            <br/>
-            <form action="" enctype="multipart/form-data" method="POST">
-                <input type="hidden" name="path" value="<?php echo $path; ?>"/>
-                <input type="file" name="file"/>
-                <br/><br/>
-                <input type="submit" name="submit" value="Uploaden" class="btn btn-primary"/>
-            </form>
+            <div class="container">
+                <div class="row">
+                    <div class="col border-left">
+                        <h3>Uploaden naar <?php echo substr($path, strrpos($path, '/') + 1); ?></h3>
+                        <br/>
+                        <form enctype="multipart/form-data" method="POST">
+                            <input type="hidden" name="path" value="<?php echo $path; ?>"/>
+                            <input type="file" name="file"/>
+                            <br/><br/>
+                            <input type="submit" name="upload" value="Uploaden" class="btn btn-primary"/>
+                        </form>
+                    </div>
+                    <div class="col border-left">
+                        <h3>Map toevoegen aan <?php echo substr($path, strrpos($path, '/') + 1); ?></h3>
+                        <br/>
+                        <form method="POST">
+                            <input type="text" name="foldername" placeholder="Naam van de map..."/>
+                            <br/><br/>
+                            <input type="submit" name="newfolder" value="Toevoegen" class="btn btn-primary"/>
+                        </form>
+                    </div>
+                </div>
+            </div>
         </div>
     </body>
 </html>

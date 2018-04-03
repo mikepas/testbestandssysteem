@@ -82,15 +82,16 @@ function ShowTable($root, $path, $syno, $list) {
                 $type = "bestand";
                 $isMSOfficeDocument = IsMSOfficeDocument($item->additional->type);
                 $size = calculateBytes($item->additional->size);
+                $url = $syno->protocol."://".$syno->hostname.":5005".$item->path;
 
                 if ($isMSOfficeDocument != false) {
                     if ($isMSOfficeDocument == "excel") {
-                        $openUrl = "ms-excel:ofe|u|http://192.168.5.220:5005$item->path";
+                        $openUrl = "ms-excel:ofe|u|$url";
 
                     } else if ($isMSOfficeDocument == "word") {
-                        $openUrl = "ms-word:ofe|u|http://192.168.5.220:5005$item->path";
+                        $openUrl = "ms-word:ofe|u|$url";
                     } else if ($isMSOfficeDocument == "powerpoint") {
-                        $openUrl = "ms-powerpoint:ofe|u|http://192.168.5.220:5005$item->path";
+                        $openUrl = "ms-powerpoint:ofe|u|$url";
                     }
                 } else {
                     $openUrl = $syno->download(array('method' => 'download', 'version' => 2, 'mode' => '"open"'), $item->path);
